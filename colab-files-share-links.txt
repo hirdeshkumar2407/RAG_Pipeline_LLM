@@ -1,3 +1,10 @@
 TASKS:
-1- Clustering:
-2- Indexing: https://colab.research.google.com/drive/1mac8zLJYSPTPUmkfPIXJ65MdtvSLcB1X?usp=sharing
+1. Preliminary analysis
+    1- Clustering:
+    2- Indexing: https://colab.research.google.com/drive/1mac8zLJYSPTPUmkfPIXJ65MdtvSLcB1X?usp=sharing
+
+2. Training Models
+    2.1 Train ML & Fine Tuning: 
+    2.2. LLM & Fine Tuning: https://colab.research.google.com/drive/1ENrIWWsoTrt34CXwNeU5wyrnH1ukeRUE?usp=sharing
+
+3. Extensions

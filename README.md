@@ -11,7 +11,7 @@ Our goal is to:
 - Perform **preliminary analysis** of the dataset structure and vocabulary
 - Build and evaluate **machine learning and deep learning models** for QA and RAG tasks
 - **Fine-tune pretrained models**, and explore the performance of **zero-shot, few-shot, and one-shot learning**
-- Conduct **exploratory clustering and document embedding** visualizations using techniques like Word2Vec and PCA/t-SNE
+- Conduct **exploratory clustering and document embedding** visualizations using techniques like Word2Vec
 
 ## 📦 Dataset
 - **Name**: RAG-Instruct  

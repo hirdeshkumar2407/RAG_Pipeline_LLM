@@ -109,7 +109,7 @@ This was assigned as part of the course **Natural Language Processing (2024/25)*
 
 
 ---
-## Acknowledgements
+## Red Chilli Models Team
 
 [Luis Felipe Epia Realpe](https://www.linkedin.com/in/luis-felipe-epia-realpe-b7770a133/)
 

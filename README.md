@@ -1,4 +1,4 @@
-# NLP Group Project 2024/25 - RAG-Instruct Dataset
+# Building a Robust RAG Pipeline: Data Analysis, LLM Fine-tuning, and Contextual QA
 
 ## 📚 Course
 Natural Language Processing, 2024/25
@@ -11,7 +11,7 @@ Our goal is to:
 - Perform **preliminary analysis** of the dataset structure and vocabulary
 - Build and evaluate **machine learning and deep learning models** for QA and RAG tasks
 - **Fine-tune pretrained models**, and explore the performance of **zero-shot, few-shot, and one-shot learning**
-- Conduct **exploratory clustering and document embedding** visualizations using techniques like Word2Vec and PCA/t-SNE
+- Conduct **exploratory clustering and document embedding** visualizations using techniques like Word2Vec
 
 ## 📦 Dataset
 - **Name**: RAG-Instruct  
@@ -20,21 +20,107 @@ Our goal is to:
 - **Features**: Each instance includes a question, a generated answer, and retrieved documents as supporting context.
 
 ## 🔍 Tasks and Methods
-1. **Preprocessing & Exploration**
-   - Tokenization and basic NLP preprocessing
-   - Vocabulary size analysis
-   - Length distribution of questions and contexts
+### 1. Preliminary Analysis
 
-2. **Model Training**
-   - Train a baseline classifier or QA model (e.g., LSTM, Transformer)
-   - Fine-tune a pretrained model like BERT or T5
-   - Evaluate zero-shot, one-shot, and few-shot performance of LLMs
+This phase focused on thoroughly understanding the dataset's structure, content, and inherent characteristics using various NLP techniques.
 
-3. **Extensions (Optional)**
-   - Explore alternative tasks (e.g., summarization of documents)
-   - Investigate retrieval methods and compare RAG pipelines
-   - Train/fine-tune a small LLM if resources allow
+*   **Briefly describe the data:**
+    *   **Structure & Task:** The dataset is structured into `question`, `answer`, and `documents` fields. It was collected for Retrieval-Augmented Generation (RAG) tasks, where a Language Model (LLM) generates answers grounded in provided context.
+    *   **Document Types & Counts:** Contains ~40,541 QA pairs. The `documents` field comprises lists of strings (individual passages) which were combined for analysis.
+    *   **Length Distribution (on a 10% sample):** Questions (mean ~23 tokens), answers (mean ~105 tokens), and combined context documents (mean ~1166 tokens) exhibit distinct length distributions. The long context length highlights the need for context management strategies in LLM integration.
+    *   **Vocabulary (on a 10% sample):** The total collection vocabulary (unique tokens across all combined context documents in the sample) is large (~184,890 unique tokens). The average vocabulary size per combined document entry is ~491 unique tokens, indicating focused context blocks.
+
+*   **Play around with documents using code from the early parts of the course:**
+    *   **Cluster the documents & visualize:**
+        *   Combined document text from a 10% sample was vectorized using `TfidfVectorizer` (with `max_df=0.8`, `min_df=5`, `stop_words='english'`).
+        *   K-Means clustering (K=25, guided by Elbow method analysis) was applied to identify thematic groupings.
+        *   **Interpretation:** The clustering successfully identified diverse and interpretable themes such as Music, Linguistics, Chemistry, Computer Software, Web Technologies, Education/Academia, Programming, Sports, Politics/Warfare, Literature, Biology/Medicine, Data Management, History, Games, Religion, Industry/Manufacturing, Film/Television, Law/Legal System, and Demographics.
+    *   **Index the documents for keyword search:**
+        *   A PyTerrier index was created over the individual passages from the `documents` column.
+        *   Demonstrated keyword search using BM25 retrieval, including dynamic spelling correction and phrase search capabilities.
+    *   **Train a Word2Vec embedding:**
+        *   A Word2Vec model (`gensim.models.Word2Vec`) was trained on the tokenized text from the dataset.
+        *   Investigated embedding properties through `most_similar` terms and vector arithmetic (e.g., 'king' - 'man' + 'woman' ≈ 'queen').
+        *   A BM25 score visualization (Bar Chart) of sampled word embeddings was performed to illustrate semantic relationships.
+
+### 2. Training Models
+
+This phase involved building and evaluating models for the RAG task, including fine-tuning pre-trained models and assessing LLM performance in various settings.
+
+*   **Implement and evaluate a RAG pipeline:**
+    *   **Retriever System:**
+        *   Utilized a two-stage retrieval approach: a `SentenceTransformer` (bi-encoder) for initial dense retrieval, and a `CrossEncoder` for re-ranking.
+        *   An `hnswlib` index was used for efficient Approximate Nearest Neighbor search over corpus embeddings.
+        *   A function `get_related_docs` retrieves and formats the top relevant documents into a context string for the LLM.
+    *   **LLM Integration & Generation:**
+        *   The "AITeamVN/Vi-Qwen2-3B-RAG" (a 3 Billion parameter model) was selected as the generator, loaded with 4-bit quantization (`bitsandbytes`) to optimize resource usage.
+        *   **LLM Characterization:** Its configuration (Qwen2 architecture, large context window) and Hugging Face model card were analyzed for RAG-specific tuning and capabilities.
+        *   **Baseline Evaluation:** Initial qualitative evaluations of the end-to-end RAG pipeline using sample queries revealed LLM performance was highly dependent on retriever quality. When retrieved context was poor, the LLM frequently defaulted to its pre-trained knowledge, leading to answers that were not grounded in the provided context. With good context, answers were relevant and grounded.
+        *   **Prompt Engineering & Generation Parameter Tuning:** Systematically experimented with various prompt structures (e.g., strict "answer-only-from-context" instructions, role-playing) and LLM generation parameters (`temperature`, `top_p`, `do_sample`, `max_new_tokens`).
+        *   **Core RAG Generation Logic:** A programmatic RAG flow was implemented to control answer sourcing. This flow attempts to answer strictly from the provided context. If the LLM's response indicates (via specific cues or brevity) that the context is insufficient, the system falls back to generating an answer from the LLM's general knowledge.
+        *   **Context Length Handling:** Strategies for managing very long retrieved contexts (e.g., truncation) were investigated to ensure they fit within the LLM's effective processing window.
+
+*   **Evaluate LLMs: zero-shot, few-shot, and one-shot performance:**
+    *   Assessed the LLM's inherent capabilities to answer questions without, or with very limited, direct fine-tuning.
+    *   The "AITeamVN/Vi-Qwen2-3B-RAG" model and other general-purpose LLMs (e.g., FLAN-T5-small, FLAN-T5-base, Falcon-RW-1B, Mistral-7B-Instruct-v0.1) were evaluated in zero-shot, one-shot, and few-shot settings.
+    *   Qualitative and quantitative evaluations (ROUGE, BLEU, BERTScore) were performed to compare performance and assess in-context learning.
+
+*   **Fine-tune a pretrained model:**
+    *   A FLAN-T5 model (e.g., `google/flan-t5-small`) was selected and fine-tuned on the RAG-Instruct dataset.
+    *   The model was fine-tuned using (instruction, input/context, output/answer) pairs, adapting it to the specific QA task.
+    *   Standard fine-tuning techniques were applied using the Hugging Face `transformers` Trainer API.
+    *   The fine-tuned FLAN-T5 model's performance was evaluated against its pre-trained version and compared to the "AITeamVN/Vi-Qwen2-3B-RAG" model in a RAG setup.
+
+### 3. Possible Extensions
+
+This section outlines additional investigations performed or planned beyond the core project requirements.
+
+*   **Programmatic Multi-Step RAG with Stage 1 Voting:**
+    *   As an advanced refinement to the core RAG generation logic, an experimental Stage 1 ensemble/voting mechanism was explored.
+    *   This approach runs multiple conservative generation attempts (e.g., Greedy, VeryLowTemp, LowTemp) with the strict context prompt. A voting threshold (e.g., requiring 2 out of 3 votes) then determines if the context is deemed sufficient for a grounded answer.
+    *   **Findings:** This voting strategy showed improved robustness in identifying poor context and correctly falling back to general knowledge for many queries, but highlighted persistent challenges with extremely irrelevant context leading to confident, ungrounded hallucinations.
+*   **Voice Interactive Chatbot:** Making use of text-to-speech (TTS) and speech-to-text (STT) models to create a voice-interactive chatbot interface for the RAG system. This involves integrating audio input/output with the existing text-based QA pipeline, allowing users to ask questions verbally and receive spoken answers.
 
 
 ---
+
+## 🛠️ Tools & Libraries
+- Python
+- Pandas, NumPy
+- NLTK, Scikit-learn (for TF-IDF, KMeans, SVD)
+- Gensim (for Word2Vec)
+- Hugging Face `transformers` (for LLMs, tokenizers, FLAN-T5 models, SentenceTransformers, CrossEncoders)
+- `bitsandbytes` (for LLM quantization)
+- `hnswlib` (for ANN indexing)
+- `pyterrier` (for indexing and BM25 keyword search exploration)
+- `evaluate`, `rouge-score`, `bert-score`, `bleu` (for metric calculation)
+- `TTS`, `soundfile`, `espeak-ng` (for Text-to-Speech)
+- Matplotlib, Seaborn, Plotly (for visualizations)
+- Google Colab / Kaggle Notebooks (for development and GPU resources)
+
+---
+## Acknowledgements
+
+This was assigned as part of the course **Natural Language Processing (2024/25)** at **Politecnico di Milano**. We extend our sincere gratitude to:
+
+- **Professor [Mark Carman](https://www.linkedin.com/in/markcarman/)**, for providing excellent guidance throughout the course.
+- **Teaching Assistant [Nicolò Brunello](https://www.linkedin.com/in/nicol%C3%B2-brunello-78b3a8128/?originalSubdomain=it)**, for their support and valuable feedback throughout the course.
+
+
+---
+## Red Chilli Models Team
+
+[Luis Felipe Epia Realpe](https://www.linkedin.com/in/luis-felipe-epia-realpe-b7770a133/)
+
+[Mehdi Ghiasipour](https://www.linkedin.com/in/mehdi-ghiasipour-836188310/)
+
+[Ayush Bhardwaj](https://www.linkedin.com/in/hastagab/)
+
+[Nadah Khaled](https://www.linkedin.com/in/nadahkhaledd10/)
+
+[Hirdesh Kumar](https://www.linkedin.com/in/hirdeshkumar2407/)
+
+
+
+
 

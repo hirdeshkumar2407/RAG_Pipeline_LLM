@@ -34,7 +34,6 @@ This phase focused on thoroughly understanding the dataset's structure, content,
     *   **Cluster the documents & visualize:**
         *   Combined document text from a 10% sample was vectorized using `TfidfVectorizer` (with `max_df=0.8`, `min_df=5`, `stop_words='english'`).
         *   K-Means clustering (K=25, guided by Elbow method analysis) was applied to identify thematic groupings.
-        *   Clusters were visualized using TruncatedSVD for dimensionality reduction.
         *   **Interpretation:** The clustering successfully identified diverse and interpretable themes such as Music, Linguistics, Chemistry, Computer Software, Web Technologies, Education/Academia, Programming, Sports, Politics/Warfare, Literature, Biology/Medicine, Data Management, History, Games, Religion, Industry/Manufacturing, Film/Television, Law/Legal System, and Demographics.
     *   **Index the documents for keyword search:**
         *   A PyTerrier index was created over the individual passages from the `documents` column.
@@ -42,7 +41,7 @@ This phase focused on thoroughly understanding the dataset's structure, content,
     *   **Train a Word2Vec embedding:**
         *   A Word2Vec model (`gensim.models.Word2Vec`) was trained on the tokenized text from the dataset.
         *   Investigated embedding properties through `most_similar` terms and vector arithmetic (e.g., 'king' - 'man' + 'woman' ≈ 'queen').
-        *   A t-SNE visualization of sampled word embeddings was performed to illustrate semantic relationships.
+        *   A BM25 score visualization (Bar Chart) of sampled word embeddings was performed to illustrate semantic relationships.
 
 ### 2. Training Models
 

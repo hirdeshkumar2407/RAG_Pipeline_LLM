@@ -21,6 +21,8 @@ This project was a true collaborative effort, and its success is a testament to 
 
 [Nadah Khaled](https://www.linkedin.com/in/nadahkhaledd10/)
 
+[Hirdesh Kumar](https://www.linkedin.com/in/hirdeshkumar2407/)
+
 
 ## 📦 Dataset
 - **Name**: RAG-Instruct  
@@ -116,7 +118,6 @@ This was assigned as part of the course **Natural Language Processing (2024/25)*
 - **Teaching Assistant [Nicolò Brunello](https://www.linkedin.com/in/nicol%C3%B2-brunello-78b3a8128/?originalSubdomain=it)**, for their support and valuable feedback throughout the course.
 
 
-[Hirdesh Kumar](https://www.linkedin.com/in/hirdeshkumar2407/)
 
 
 
